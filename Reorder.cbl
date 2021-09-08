@@ -1,0 +1,132 @@
+       IDENTIFICATION DIVISION.
+       program-id. Reorder as "Reorder".
+       AUTHOR. Naimul Rahman.
+       
+      * David Tang and Naimul Rahman's Project 3 code was used as a base
+
+       
+        ENVIRONMENT DIVISION.
+        INPUT-OUTPUT SECTION.
+        FILE-CONTROL.
+           SELECT INVENT6
+           ASSIGN TO "C:\temp\INVENT6.TXT"
+               ORGANIZATION IS INDEXED
+               ACCESS MODE IS SEQUENTIAL
+               RECORD KEY IS PART-NUMBER-IN-PK.
+            SELECT SUPPLIERI
+           ASSIGN TO "C:\temp\SUPPLIERI.TXT"
+               ORGANIZATION IS INDEXED
+               ACCESS MODE IS RANDOM
+               RECORD KEY IS SUPPLIER-CODE-OUT-PK.
+           SELECT  REORDER-REPORT-OUT
+                ASSIGN TO "C:\temp\REORDER_REPORT.TXT"
+                     ORGANIZATION IS LINE SEQUENTIAL.
+           
+
+       DATA DIVISION.
+       FILE SECTION.
+       
+       FD  INVENT6.
+       01  INVENTORY-RECORD-OUT.
+           COPY IndexedInventRecordStr.cpy IN copy-lib.
+   
+       FD  SUPPLIERI.
+       01  SUPPLIER-RECORD-IN.
+           COPY IndexedSupplierStr.cpy IN copy-lib.
+   
+       FD REORDER-REPORT-OUT.
+       01 REORDER-RECORD-OUT  PIC X(64).
+
+       WORKING-STORAGE SECTION.
+           
+       01  RE-ORDER-RECORD-DETAIL.
+           05  PART-NUMBER-REORDER PIC Z(6)9.
+           05  FILLER              PIC X(4) VALUE SPACES.
+           05  PART-NAME-REORDER   PIC X(20).
+           05  FILLER              PIC X(4) VALUE SPACES.
+           05  QTY-ON-HAND-REORDER PIC ZZ9.
+           05  FILLER              PIC X(4) VALUE SPACES.
+           05  RE-ORDER-POINT-WS   PIC ZZ9.
+           05  FILLER              PIC X(4) VALUE SPACES.
+           05  SUPPLIER-NAME-REORDER PIC X(15).
+           
+       01  REORDER-RPT-COLUMN-HEADER.
+           05 FILLER   PIC X(10)  VALUE   "PARTNUMBER".
+           05  FILLER  PIC X(4)   VALUE   SPACES.
+           05  FILLER  PIC X(8)   VALUE   "PARTNAME".
+           05  FILLER  PIC X(13)   VALUE   SPACES.
+           05  FILLER  PIC X(3)   VALUE   "QTY".
+           05  FILLER  PIC X(2)   VALUE   SPACES.
+           05  FILLER  PIC X(10)    VALUE   "REORDER-PT".
+           05  FILLER  PIC X(2)   VALUE   SPACES.
+           05  FILLER  PIC X(9)    VALUE   "SUPP-NAME".
+           
+       01  FLAGS-AND-COUNTERS.
+           05  INVENT-EOF-FLAG     PIC X(3) VALUE "NO".
+
+       PROCEDURE DIVISION.
+       100-PRODUCE-REORDER-REPORT.
+           PERFORM 201-INIT-REORDER-REPORT.
+           PERFORM 202-PRODUCE-REORDER-DETAIL-RECORD
+               UNTIL INVENT-EOF-FLAG = "YES".
+           PERFORM 203-TERM-REORDER-REPORT.
+            EXIT PROGRAM.
+
+       201-INIT-REORDER-REPORT.
+           PERFORM 301-OPEN-INV-FILES.
+           PERFORM 304-READ-INV-RECORD.
+           PERFORM 302-WRITE-COL-HEADERS.
+
+       202-PRODUCE-REORDER-DETAIL-RECORD.
+           PERFORM 309-PROCESS-REPORT-ORDER-RECORD.
+           PERFORM 304-READ-INV-RECORD.
+
+       203-TERM-REORDER-REPORT.
+           PERFORM 308-CLOSE-INV-FILES.
+
+       301-OPEN-INV-FILES.
+           OPEN INPUT INVENT6 SUPPLIERI
+                OUTPUT  REORDER-REPORT-OUT.
+
+       302-WRITE-COL-HEADERS.
+           WRITE REORDER-RECORD-OUT FROM REORDER-RPT-COLUMN-HEADER.
+
+       304-READ-INV-RECORD.
+           READ INVENT6
+              AT END  MOVE "YES" TO INVENT-EOF-FLAG.
+
+       308-CLOSE-INV-FILES.
+           CLOSE INVENT6 SUPPLIERI
+           REORDER-REPORT-OUT.
+       
+       309-PROCESS-REPORT-ORDER-RECORD.
+           IF QTY-ON-HAND  < RE-ORDER-POINT-IN
+               PERFORM 401-GET-SUPPLIER-NAME
+               PERFORM 402-WRITE-REPORT-ORDER-RECORD
+           END-IF.
+           
+       401-GET-SUPPLIER-NAME.
+           MOVE SUPPLIER-CODE-IN-FK TO SUPPLIER-CODE-OUT-PK.
+           READ SUPPLIERI INVALID KEY PERFORM 702-INVALID-SUPPLY-KEY
+           NOT INVALID KEY MOVE SUPPLIER-NAME-OUT TO 
+           SUPPLIER-NAME-REORDER.    
+           
+       402-WRITE-REPORT-ORDER-RECORD.
+           MOVE PART-NUMBER-IN-PK TO PART-NUMBER-REORDER.
+           MOVE PART-NAME   TO PART-NAME-REORDER.
+           MOVE QTY-ON-HAND  TO QTY-ON-HAND-REORDER.
+           MOVE RE-ORDER-POINT-IN TO RE-ORDER-POINT-WS.
+           MOVE RE-ORDER-RECORD-DETAIL TO REORDER-RECORD-OUT.
+           WRITE REORDER-RECORD-OUT.    
+
+       702-INVALID-SUPPLY-KEY.
+           DISPLAY "INVALID SUPPLY KEY ERROR". 
+               
+       
+           
+       
+               
+           
+
+       
+

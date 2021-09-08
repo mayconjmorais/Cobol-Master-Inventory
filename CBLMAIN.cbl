@@ -1,5 +1,5 @@
       ******************************************************************
-   	  * This program is to:
+      * This program is to:
       *      - convert Master Inventory Sequential File
       *        to Indexed Sequencial File.
       *
@@ -7,7 +7,7 @@
       *        to Supplier Indexed File.
       *
       *      - call routine to create Inventory Report File  
-   	  *
+      *
       *      - call routine to create Re-order Report File
       *
       ******************************************************************
@@ -17,7 +17,7 @@
        PROGRAM-ID.                 CBLMAIN.
        AUTHOR.                     Maycon Morais.
        DATE-WRITTEN.               APRIL 01 2020.
-	   DATE-COMPILED.              SEP 02 2021.
+       DATE-COMPILED.              SEP 02 2021.
 
        ENVIRONMENT                       DIVISION.
        INPUT-OUTPUT                      SECTION.
